@@ -2,48 +2,53 @@ import { useState, useEffect } from 'react';
 import { Notification } from '@/types';
 import { socketService } from '@/services/socketService';
 import { notificationApi } from '@/services/mockApi';
+import { useNotificationStore } from '@/stores/notificationStore';
 
 export function useNotifications(userId?: string) {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const { notifications, unreadCount, setNotifications, addNotification, markAsRead, markAllRead } =
+    useNotificationStore();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
 
-    // Load initial notifications
-    notificationApi.getForUser(userId).then(data => {
-      setNotifications(data);
-      setUnreadCount(data.filter(n => !n.isRead).length);
-    });
+    // Load from real API
+    setLoading(true);
+    notificationApi.getForUser(userId)
+      .then(data => setNotifications(data))
+      .catch(console.error)
+      .finally(() => setLoading(false));
 
-    // Connect socket if needed
-    if (!socketService.isConnected()) {
-      socketService.connect('dummy-token');
+    // Subscribe to real-time notifications via WebSocket
+    const token = localStorage.getItem('auth-token');
+    if (token && !socketService.isConnected()) {
+      socketService.connect(token).catch(console.error);
     }
 
-    const unsubscribe = socketService.subscribe(`user.\${userId}.notifications`, (event) => {
-      const newNotif = event.payload as Notification;
-      setNotifications(prev => [newNotif, ...prev]);
-      setUnreadCount(prev => prev + 1);
-    });
+    const unsubscribe = socketService.subscribe(
+      `user.${userId}.notifications`,
+      (event) => addNotification(event.payload as Notification)
+    );
 
-    return () => {
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [userId]);
 
-  const markAsRead = async (id: string) => {
+  const handleMarkAsRead = async (id: string) => {
     await notificationApi.markAsRead(id);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    setUnreadCount(prev => Math.max(0, prev - 1));
+    markAsRead(id);
   };
 
-  const markAllRead = async () => {
+  const handleMarkAllRead = async () => {
     if (!userId) return;
     await notificationApi.markAllRead(userId);
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-    setUnreadCount(0);
+    markAllRead();
   };
 
-  return { notifications, unreadCount, markAsRead, markAllRead };
+  return {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead: handleMarkAsRead,
+    markAllRead: handleMarkAllRead,
+  };
 }

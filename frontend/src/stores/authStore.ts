@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { User, UserRole } from '@/types';
-import { authApi } from '@/services/mockApi';
+import api from '@/services/api';
 
 interface AuthStore {
   user: User | null;
@@ -18,15 +18,22 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      login: async (email, password, role) => {
-        const result = await authApi.login(email, password, role);
-        set({ user: result.user, token: result.token, isAuthenticated: true });
-        localStorage.setItem('auth-token', result.token);
+
+      login: async (email, password, _role) => {
+        const res = await api.post('/auth/login', { email, password });
+        const { user, token } = res.data.data;
+        set({ user, token, isAuthenticated: true });
+        localStorage.setItem('auth-token', token);
       },
+
       logout: () => {
-        set({ user: null, token: null, isAuthenticated: false });
+        // fire-and-forget logout call
+        api.post('/auth/logout').catch(() => {});
         localStorage.removeItem('auth-token');
+        localStorage.removeItem('auth-storage');
+        set({ user: null, token: null, isAuthenticated: false });
       },
+
       setUser: (user) => set({ user }),
     }),
     { name: 'auth-storage' }

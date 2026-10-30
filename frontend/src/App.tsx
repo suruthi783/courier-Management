@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { router } from '@/router';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAuthStore } from '@/stores/authStore';
+import { socketService } from '@/services/socketService';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,10 +18,22 @@ const queryClient = new QueryClient({
 
 export const App: React.FC = () => {
   const { isDark } = useThemeStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', isDark);
   }, [isDark]);
+
+  // Connect WebSocket when user is logged in
+  useEffect(() => {
+    const token = localStorage.getItem('auth-token');
+    if (isAuthenticated && token && !socketService.isConnected()) {
+      socketService.connect(token).catch(console.error);
+    }
+    if (!isAuthenticated) {
+      socketService.disconnect();
+    }
+  }, [isAuthenticated]);
 
   return (
     <QueryClientProvider client={queryClient}>
