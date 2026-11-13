@@ -146,6 +146,13 @@ export const LoginPage: React.FC = () => {
             <p>Delivery: driver@demo.com / password123</p>
           </div>
         </div>
+
+        <p className="text-center text-gray-400 text-sm mt-4">
+          Don't have an account?{' '}
+          <a href="/register" className="text-orange-500 hover:text-orange-400 font-medium">
+            Create account
+          </a>
+        </p>
       </div>
     </div>
   );

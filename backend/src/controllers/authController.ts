@@ -52,7 +52,36 @@ export async function logout(req: AuthRequest, res: Response, next: NextFunction
   } catch (err) { next(err); }
 }
 
-export async function changePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { name, email, phone, password } = req.body as { name: string; email: string; phone: string; password: string };
+
+    const existing = queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing) {
+      res.status(409).json({ success: false, message: 'Email already in use' });
+      return;
+    }
+
+    const id = uuidv4();
+    const hash = await bcrypt.hash(password, 10);
+
+    execute(
+      `INSERT INTO users (id, name, email, phone, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', 1)`,
+      [id, name, email, phone, hash]
+    );
+
+    const payload: JwtPayload = { userId: id, role: 'CUSTOMER' };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+
+    const newUser = queryOne<UserWithPassword>(
+      'SELECT id, name, email, phone, role, is_active, created_at FROM users WHERE id = ?', [id]
+    );
+
+    logAudit({ userId: id, action: 'REGISTER', resource: 'USER', resourceId: id, details: `New customer registered: ${email}`, ipAddress: req.ip });
+
+    res.status(201).json({ success: true, message: 'Account created successfully', data: { user: newUser, token } });
+  } catch (err) { next(err); }
+}(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
     const userId = req.user!.userId;

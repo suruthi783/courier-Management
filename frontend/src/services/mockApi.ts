@@ -15,6 +15,10 @@ export const authApi = {
     const res = await api.post('/auth/login', { email, password });
     return res.data.data as { user: User; token: string };
   },
+  register: async (name: string, email: string, phone: string, password: string) => {
+    const res = await api.post('/auth/register', { name, email, phone, password });
+    return res.data.data as { user: User; token: string };
+  },
   verifyToken: async (_token: string) => {
     const res = await api.get('/auth/me');
     return res.data.data as User;
