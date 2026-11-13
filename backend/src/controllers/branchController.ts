@@ -1,8 +1,8 @@
 import { Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { query, queryOne, execute } from '../config/database.js';
-import { AuthRequest, Branch } from '../types/index.js';
-import { logAudit } from '../utils/auditLogger.js';
+import { query, queryOne, execute } from '../config/database';
+import { AuthRequest, Branch } from '../types/index';
+import { logAudit } from '../utils/auditLogger';
 
 export async function getBranches(_req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {

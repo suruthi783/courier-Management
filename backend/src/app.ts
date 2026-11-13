@@ -8,17 +8,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // ── Route imports ─────────────────────────────────────────────
-import authRoutes         from './routes/authRoutes.js';
-import userRoutes         from './routes/userRoutes.js';
-import branchRoutes       from './routes/branchRoutes.js';
-import shipmentRoutes     from './routes/shipmentRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
-import deliveryRoutes     from './routes/deliveryRoutes.js';
-import dashboardRoutes    from './routes/dashboardRoutes.js';
-import auditRoutes        from './routes/auditRoutes.js';
+import authRoutes         from './routes/authRoutes';
+import userRoutes         from './routes/userRoutes';
+import branchRoutes       from './routes/branchRoutes';
+import shipmentRoutes     from './routes/shipmentRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import deliveryRoutes     from './routes/deliveryRoutes';
+import dashboardRoutes    from './routes/dashboardRoutes';
+import auditRoutes        from './routes/auditRoutes';
 
 // ── Middleware imports ────────────────────────────────────────
-import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { errorHandler, notFound } from './middleware/errorHandler';
 
 const app = express();
 

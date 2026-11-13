@@ -3,9 +3,9 @@ import { body } from 'express-validator';
 import {
   getUsers, getUserById, createUser, updateUser,
   toggleUserActive, getDeliveryPartners,
-} from '../controllers/userController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+} from '../controllers/userController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 

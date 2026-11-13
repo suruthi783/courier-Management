@@ -1,9 +1,9 @@
 import { Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { query, queryOne, execute } from '../config/database.js';
-import { AuthRequest, Shipment, ShipmentTimeline } from '../types/index.js';
-import { logAudit } from '../utils/auditLogger.js';
-import { generateOtp, generateTrackingId } from '../utils/generateOtp.js';
+import { query, queryOne, execute } from '../config/database';
+import { AuthRequest, Shipment, ShipmentTimeline } from '../types/index';
+import { logAudit } from '../utils/auditLogger';
+import { generateOtp, generateTrackingId } from '../utils/generateOtp';
 
 function getTimeline(shipmentId: string): ShipmentTimeline[] {
   return query<ShipmentTimeline>('SELECT * FROM shipment_timeline WHERE shipment_id=? ORDER BY timestamp ASC',[shipmentId]);

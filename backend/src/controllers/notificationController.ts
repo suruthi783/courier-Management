@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { query, queryOne, execute } from '../config/database.js';
-import { AuthRequest, Notification } from '../types/index.js';
+import { query, queryOne, execute } from '../config/database';
+import { AuthRequest, Notification } from '../types/index';
 
 export async function getNotifications(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {

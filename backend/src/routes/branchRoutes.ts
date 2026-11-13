@@ -3,9 +3,9 @@ import { body } from 'express-validator';
 import {
   getBranches, getBranchById, createBranch,
   updateBranch, toggleBranchActive, deleteBranch,
-} from '../controllers/branchController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+} from '../controllers/branchController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 

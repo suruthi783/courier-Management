@@ -1,9 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { query, queryOne, execute } from '../config/database.js';
-import { UserWithPassword, JwtPayload, AuthRequest } from '../types/index.js';
-import { logAudit } from '../utils/auditLogger.js';
+import { query, queryOne, execute } from '../config/database';
+import { UserWithPassword, JwtPayload, AuthRequest } from '../types/index';
+import { logAudit } from '../utils/auditLogger';
 
 const JWT_SECRET     = process.env.JWT_SECRET     ?? 'courier_super_secret_jwt_key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '7d';

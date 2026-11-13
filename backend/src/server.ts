@@ -1,8 +1,8 @@
 import http from 'http';
 import dotenv from 'dotenv';
-import app from './app.js';
-import { connectDB } from './config/database.js';
-import { createWsServer } from './websocket/wsServer.js';
+import app from './app';
+import { connectDB } from './config/database';
+import { createWsServer } from './websocket/wsServer';
 
 dotenv.config();
 

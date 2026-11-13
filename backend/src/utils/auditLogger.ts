@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { execute } from '../config/database.js';
+import { execute } from '../config/database';
 
 interface AuditEntry {
   userId: string;

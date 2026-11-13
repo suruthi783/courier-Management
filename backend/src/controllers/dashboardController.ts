@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { query, queryOne } from '../config/database.js';
-import { AuthRequest } from '../types/index.js';
+import { query, queryOne } from '../config/database';
+import { AuthRequest } from '../types/index';
 
 export async function getDashboardStats(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {

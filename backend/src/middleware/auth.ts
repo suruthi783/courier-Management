@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { AuthRequest, JwtPayload, UserRole } from '../types/index.js';
+import { AuthRequest, JwtPayload, UserRole } from '../types/index';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'courier_super_secret_jwt_key';
 

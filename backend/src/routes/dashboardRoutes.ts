@@ -2,8 +2,8 @@ import { Router } from 'express';
 import {
   getDashboardStats, getDeliveryTrends, getStatusBreakdown,
   getBranchRevenue, getTopPartners, getLivePartners,
-} from '../controllers/dashboardController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+} from '../controllers/dashboardController';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 

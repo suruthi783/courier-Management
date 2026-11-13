@@ -18,10 +18,7 @@
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "noUnusedParameters": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

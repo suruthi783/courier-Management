@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { query, queryOne } from '../config/database.js';
-import { AuthRequest, AuditLog } from '../types/index.js';
+import { query, queryOne } from '../config/database';
+import { AuthRequest, AuditLog } from '../types/index';
 
 export async function getAuditLogs(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {

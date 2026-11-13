@@ -2,9 +2,9 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import {
   getNotifications, markAsRead, markAllRead, createNotification,
-} from '../controllers/notificationController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+} from '../controllers/notificationController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 

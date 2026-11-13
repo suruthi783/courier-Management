@@ -2,8 +2,8 @@ import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
 import { Server } from 'http';
 import jwt from 'jsonwebtoken';
-import { query, execute } from '../config/database.js';
-import { JwtPayload, Shipment } from '../types/index.js';
+import { query, execute } from '../config/database';
+import { JwtPayload, Shipment } from '../types/index';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'courier_super_secret_jwt_key';
 

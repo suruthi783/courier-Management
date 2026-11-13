@@ -3,9 +3,9 @@ import { body } from 'express-validator';
 import {
   getShipments, getShipmentById, trackShipment,
   createShipment, updateShipmentStatus, assignPartner, updateLocation,
-} from '../controllers/shipmentController.js';
-import { authenticate, authorize } from '../middleware/auth.js';
-import { validate } from '../middleware/validate.js';
+} from '../controllers/shipmentController';
+import { authenticate, authorize } from '../middleware/auth';
+import { validate } from '../middleware/validate';
 
 const router = Router();
 
