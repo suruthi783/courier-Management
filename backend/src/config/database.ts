@@ -30,10 +30,13 @@ export async function connectDB(): Promise<void> {
       .get();
 
     if (!tables) {
-      console.log('🔧  First run — initialising schema and seed data…');
+      console.log('🔧  First run — initialising schema…');
       await initDb();
-      console.log('✅  Database ready');
+    } else {
+      // Always re-seed demo data (handles Render ephemeral restarts)
+      await seedDemoData();
     }
+    console.log('✅  Database ready');
   } catch (err) {
     console.error('❌  SQLite error:', err);
     process.exit(1);
@@ -57,6 +60,29 @@ export function execute(sql: string, params: unknown[] = []): Database.RunResult
 }
 
 // ── Schema + Seed (runs only once on first start) ─────────────
+async function seedDemoData(): Promise<void> {
+  const db = getDb();
+  const HASH = '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
+
+  const seedBranch = db.prepare(`INSERT OR IGNORE INTO branches (id,name,code,address,city,state,lat,lng,is_active) VALUES (?,?,?,?,?,?,?,?,1)`);
+  const seedUser   = db.prepare(`INSERT OR IGNORE INTO users (id,name,email,phone,password_hash,role,branch_id,is_active) VALUES (?,?,?,?,?,?,?,1)`);
+
+  db.transaction(() => {
+    seedBranch.run('branch-1','Downtown Hub','DTH','123 Main St','Denver','CO',39.7392,-104.9903);
+    seedBranch.run('branch-2','Lakewood Center','LKW','456 Colfax Ave','Lakewood','CO',39.7047,-105.0814);
+    seedBranch.run('branch-3','Aurora Station','AUR','789 Havana St','Aurora','CO',39.7294,-104.8319);
+    seedUser.run('user-1','Daniel Cooper','customer@demo.com','+1-303-555-0101',HASH,'CUSTOMER',null);
+    seedUser.run('user-2','Sarah Chen','admin@demo.com','+1-555-0102',HASH,'ADMIN',null);
+    seedUser.run('user-3','Mike Johnson','staff@demo.com','+1-555-0103',HASH,'BRANCH_STAFF','branch-1');
+    seedUser.run('user-4','Jimmy Jordan','driver@demo.com','+1-555-0104',HASH,'DELIVERY_PARTNER',null);
+    seedUser.run('user-5','Emily Davis','emily.customer@demo.com','+1-555-0105',HASH,'CUSTOMER',null);
+    seedUser.run('user-6','Robert Wilson','driver2@demo.com','+1-555-0106',HASH,'DELIVERY_PARTNER',null);
+    seedUser.run('user-7','Anna Taylor','staff2@demo.com','+1-555-0107',HASH,'BRANCH_STAFF','branch-2');
+    seedUser.run('user-8','James Anderson','driver3@demo.com','+1-555-0108',HASH,'DELIVERY_PARTNER',null);
+  })();
+  console.log('✅  Demo users seeded');
+}
+
 async function initDb(): Promise<void> {
   const db = getDb();
 
@@ -289,4 +315,6 @@ async function initDb(): Promise<void> {
     seedAudit.run('audit-4','user-2','BRANCH_UPDATED','BRANCH','branch-1','Updated Downtown Hub details',daysAgo(2));
     seedAudit.run('audit-5','user-2','STATUS_UPDATE','SHIPMENT','ship-2','Status changed to DELIVERED',daysAgo(1));
   })();
+  // Also seed demo users separately to ensure they exist
+  await seedDemoData();
 }
