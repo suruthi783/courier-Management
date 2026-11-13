@@ -32,10 +32,9 @@ export async function connectDB(): Promise<void> {
     if (!tables) {
       console.log('🔧  First run — initialising schema…');
       await initDb();
-    } else {
-      // Always re-seed demo data (handles Render ephemeral restarts)
-      await seedDemoData();
     }
+    // Always seed demo users on every startup — handles Render ephemeral restarts
+    await seedDemoData();
     console.log('✅  Database ready');
   } catch (err) {
     console.error('❌  SQLite error:', err);

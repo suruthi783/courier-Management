@@ -46,31 +46,3 @@ export const useAuthStore = create<AuthStore>()(
     { name: 'auth-storage' }
   )
 );
-
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-
-      login: async (email, password, _role) => {
-        const res = await api.post('/auth/login', { email, password });
-        const { user, token } = res.data.data;
-        set({ user, token, isAuthenticated: true });
-        localStorage.setItem('auth-token', token);
-      },
-
-      logout: () => {
-        // fire-and-forget logout call
-        api.post('/auth/logout').catch(() => {});
-        localStorage.removeItem('auth-token');
-        localStorage.removeItem('auth-storage');
-        set({ user: null, token: null, isAuthenticated: false });
-      },
-
-      setUser: (user) => set({ user }),
-    }),
-    { name: 'auth-storage' }
-  )
-);
