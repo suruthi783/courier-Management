@@ -1,13 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { query, queryOne, execute } from '../config/database';
+import { v4 as uuidv4 } from 'uuid';
+import { queryOne, execute } from '../config/database';
 import { UserWithPassword, JwtPayload, AuthRequest } from '../types/index';
 import { logAudit } from '../utils/auditLogger';
 
 const JWT_SECRET     = process.env.JWT_SECRET     ?? 'courier_super_secret_jwt_key';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN ?? '7d';
 
+// ── POST /api/auth/login ──────────────────────────────────────
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { email, password } = req.body as { email: string; password: string };
@@ -33,6 +35,38 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   } catch (err) { next(err); }
 }
 
+// ── POST /api/auth/register ───────────────────────────────────
+export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { name, email, phone, password } = req.body as { name: string; email: string; phone: string; password: string };
+
+    const existing = queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email]);
+    if (existing) {
+      res.status(409).json({ success: false, message: 'Email already in use' });
+      return;
+    }
+
+    const id   = uuidv4();
+    const hash = await bcrypt.hash(password, 10);
+
+    execute(
+      `INSERT INTO users (id, name, email, phone, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', 1)`,
+      [id, name, email, phone, hash]
+    );
+
+    const payload: JwtPayload = { userId: id, role: 'CUSTOMER' };
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
+    const newUser = queryOne<UserWithPassword>(
+      'SELECT id, name, email, phone, role, is_active, created_at FROM users WHERE id = ?', [id]
+    );
+
+    logAudit({ userId: id, action: 'REGISTER', resource: 'USER', resourceId: id, details: `Registered: ${email}`, ipAddress: req.ip });
+
+    res.status(201).json({ success: true, message: 'Account created successfully', data: { user: newUser, token } });
+  } catch (err) { next(err); }
+}
+
+// ── GET /api/auth/me ──────────────────────────────────────────
 export async function getMe(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const user = queryOne<UserWithPassword>(
@@ -45,6 +79,7 @@ export async function getMe(req: AuthRequest, res: Response, next: NextFunction)
   } catch (err) { next(err); }
 }
 
+// ── POST /api/auth/logout ─────────────────────────────────────
 export async function logout(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     logAudit({ userId: req.user!.userId, action: 'LOGOUT', resource: 'USER', resourceId: req.user!.userId, details: 'User logged out', ipAddress: req.ip });
@@ -52,36 +87,8 @@ export async function logout(req: AuthRequest, res: Response, next: NextFunction
   } catch (err) { next(err); }
 }
 
-export async function register(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const { name, email, phone, password } = req.body as { name: string; email: string; phone: string; password: string };
-
-    const existing = queryOne<{ id: string }>('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing) {
-      res.status(409).json({ success: false, message: 'Email already in use' });
-      return;
-    }
-
-    const id = uuidv4();
-    const hash = await bcrypt.hash(password, 10);
-
-    execute(
-      `INSERT INTO users (id, name, email, phone, password_hash, role, is_active) VALUES (?, ?, ?, ?, ?, 'CUSTOMER', 1)`,
-      [id, name, email, phone, hash]
-    );
-
-    const payload: JwtPayload = { userId: id, role: 'CUSTOMER' };
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as jwt.SignOptions);
-
-    const newUser = queryOne<UserWithPassword>(
-      'SELECT id, name, email, phone, role, is_active, created_at FROM users WHERE id = ?', [id]
-    );
-
-    logAudit({ userId: id, action: 'REGISTER', resource: 'USER', resourceId: id, details: `New customer registered: ${email}`, ipAddress: req.ip });
-
-    res.status(201).json({ success: true, message: 'Account created successfully', data: { user: newUser, token } });
-  } catch (err) { next(err); }
-}(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+// ── POST /api/auth/change-password ────────────────────────────
+export async function changePassword(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   try {
     const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
     const userId = req.user!.userId;
