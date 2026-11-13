@@ -29,7 +29,10 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // ── CORS ──────────────────────────────────────────────────────
 app.use(
   cors({
-    origin: process.env.CLIENT_URL ?? 'http://localhost:5173',
+    origin: [
+      process.env.CLIENT_URL ?? 'http://localhost:5173',
+      /\.netlify\.app$/,
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
